@@ -1,0 +1,350 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Progres - SmartStudyApp{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="fw-bold" style="color: var(--navy-dark);">Dashboard Perkembangan</h2>
+        <p class="text-muted">Pantau progres belajarmu dan lihat materi yang perlu diulang.</p>
+    </div>
+</div>
+
+<!-- 1. KARTU STATISTIK UTAMA -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3 col-sm-6">
+        <div class="card card-elegant p-4 border-start border-4 border-primary">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <p class="text-muted small mb-1 text-uppercase fw-semibold">Total Materi</p>
+                    <h3 class="fw-bold mb-0" style="color: var(--navy-dark);">{{ total_materi | default(0) }}</h3>
+                </div>
+                <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
+                    <i class="fas fa-book fa-lg text-primary"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="card card-elegant p-4 border-start border-4 border-success">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <p class="text-muted small mb-1 text-uppercase fw-semibold">Rata-rata Nilai</p>
+                    <h3 class="fw-bold mb-0" style="color: var(--navy-dark);">{{ avg_nilai | default(0) }}%</h3>
+                </div>
+                <div class="bg-success bg-opacity-10 p-3 rounded-circle">
+                    <i class="fas fa-chart-line fa-lg text-success"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="card card-elegant p-4 border-start border-4 border-warning">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <p class="text-muted small mb-1 text-uppercase fw-semibold">Flashcard Dikuasai</p>
+                    <h3 class="fw-bold mb-0" style="color: var(--navy-dark);">{{ total_flashcard | default(0) }}</h3>
+                </div>
+                <div class="bg-warning bg-opacity-10 p-3 rounded-circle">
+                    <i class="fas fa-layer-group fa-lg text-warning"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="card card-elegant p-4 border-start border-4 border-danger">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <p class="text-muted small mb-1 text-uppercase fw-semibold">Perlu Diulang</p>
+                    <h3 class="fw-bold mb-0" style="color: var(--navy-dark);">{{ perlu_diulang | default(0) }}</h3>
+                </div>
+                <div class="bg-danger bg-opacity-10 p-3 rounded-circle">
+                    <i class="fas fa-sync-alt fa-lg text-danger"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2. GRAFIK NILAI & STREAK BELAJAR -->
+<div class="row g-4 mb-5">
+    <div class="col-lg-8">
+        <div class="card card-elegant p-4 h-100">
+            <h4 class="fw-bold mb-3" style="color: var(--navy-dark);">
+                <i class="fas fa-chart-line me-2 text-success"></i>Grafik Nilai Kuis
+            </h4>
+            {% if riwayat_nilai %}
+                <canvas id="chartNilai" height="110"></canvas>
+            {% else %}
+                <div class="text-center text-muted py-5">
+                    <i class="fas fa-chart-line fa-3x mb-3" style="color: #cbd5e1;"></i>
+                    <p class="mb-0">Belum ada riwayat kuis. Kerjakan kuis pertamamu untuk melihat grafik progres di sini!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card card-elegant p-4 h-100">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h5 class="fw-bold mb-0" style="color: var(--navy-dark);">
+                    <i class="fas fa-fire me-2 text-danger"></i>Streak Belajar
+                </h5>
+                <span class="badge bg-danger bg-opacity-10 text-danger" style="font-size: 0.9rem;">{{ streak }} hari</span>
+            </div>
+            <div class="heatmap-grid">
+                {% for hari in aktivitas_grid %}
+                <div class="heatmap-cell heatmap-level-{{ hari.level }}" title="{{ hari.tanggal }}: {{ hari.jumlah }} aktivitas"></div>
+                {% endfor %}
+            </div>
+            <p class="text-muted small mt-3 mb-0">70 hari terakhir. Makin gelap = makin aktif belajar.</p>
+        </div>
+    </div>
+</div>
+
+<!-- 3. PENCAPAIAN / BADGE -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card card-elegant p-4">
+            <h4 class="fw-bold mb-3" style="color: var(--navy-dark);">
+                <i class="fas fa-medal me-2 text-warning"></i>Pencapaian
+            </h4>
+            <div class="d-flex flex-wrap gap-3">
+                {% for badge in badges %}
+                <div class="text-center badge-item {{ 'earned' if badge.earned else 'locked' }}" style="width: 110px;">
+                    <div class="badge-icon mb-2">
+                        <i class="fas {{ badge.icon }}"></i>
+                    </div>
+                    <p class="small mb-0 fw-semibold">{{ badge.nama }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 4. PERPUSTAKAAN MATERI -->
+<div class="row">
+    <div class="col-12">
+        <div class="card card-elegant p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                <h4 class="fw-bold mb-0" style="color: var(--navy-dark);">
+                    <i class="fas fa-folder-open me-2 text-primary"></i>Perpustakaan Materi Saya
+                </h4>
+                <div class="d-flex gap-2 flex-wrap">
+                    <select class="form-select bg-light" id="filterJenjang" style="width: auto;">
+                        <option value="">Semua Jenjang</option>
+                        <option value="SD">SD</option>
+                        <option value="SMP">SMP</option>
+                        <option value="SMA">SMA</option>
+                        <option value="Kuliah">Kuliah</option>
+                    </select>
+                    <div class="input-group" style="width: auto;">
+                        <span class="input-group-text bg-light border-end-0"><i class="fas fa-search text-muted"></i></span>
+                        <input type="text" class="form-control border-start-0 bg-light" id="cariMateri" placeholder="Cari materi...">
+                    </div>
+                    <a href="/buat_materi" class="btn btn-accent">
+                        <i class="fas fa-plus me-1"></i> Tambah
+                    </a>
+                </div>
+            </div>
+
+            <!-- TABEL MATERI -->
+            {% if materi_terakhir %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" id="tabelMateri">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-3" style="width: 40%;">Judul Materi</th>
+                            <th>Jenjang</th>
+                            <th>Tanggal Dibuat</th>
+                            <th>Nilai Terakhir</th>
+                            <th class="text-end pe-3">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for materi in materi_terakhir %}
+                        <tr class="baris-materi" data-judul="{{ materi.judul | lower }}" data-jenjang="{{ materi.jenjang }}">
+                            <td class="ps-3">
+                                <div class="fw-semibold" style="color: var(--navy-dark);">{{ materi.judul }}</div>
+                                <small class="text-muted">{{ materi.tipe_input | capitalize }}</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">{{ materi.jenjang }}</span>
+                            </td>
+                            <td class="text-muted small">{{ materi.tanggal }}</td>
+                            <td>
+                                <!-- Simulasi nilai (bisa diintegrasikan dengan tabel progress nanti) -->
+                                <span class="badge bg-success bg-opacity-10 text-success">-</span>
+                            </td>
+                            <td class="text-end pe-3">
+                                <a href="/materi/{{ materi.id }}" class="btn btn-sm btn-outline-primary me-1" title="Lihat Paket Belajar">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="/kuis/{{ materi.id }}" class="btn btn-sm btn-outline-success me-1" title="Kerjakan Kuis">
+                                    <i class="fas fa-play"></i>
+                                </a>
+                                <form action="/hapus_materi/{{ materi.id }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus materi ini?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <p class="text-muted text-center py-4 mb-0 d-none" id="pesanTidakketemu">
+                    <i class="fas fa-search me-2"></i>Tidak ada materi yang cocok dengan pencarian/filter.
+                </p>
+            </div>
+            {% else %}
+                <!-- EMPTY STATE -->
+                <div class="text-center py-5">
+                    <i class="fas fa-book-open fa-4x mb-3" style="color: #cbd5e1;"></i>
+                    <h5 class="fw-bold" style="color: var(--navy-dark);">Belum ada materi tersimpan</h5>
+                    <p class="text-muted mb-4">Kamu belum membuat atau menyimpan materi apapun. Yuk mulai belajar!</p>
+                    <a href="/buat_materi" class="btn btn-accent px-4">
+                        <i class="fas fa-plus me-2"></i> Buat Materi Pertama
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .heatmap-grid {
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);
+        gap: 4px;
+    }
+    .heatmap-cell {
+        aspect-ratio: 1;
+        border-radius: 3px;
+        background-color: #ebedf0;
+    }
+    .heatmap-level-0 { background-color: #ebedf0; }
+    .heatmap-level-1 { background-color: #c7d2fe; }
+    .heatmap-level-2 { background-color: #a5b4fc; }
+    .heatmap-level-3 { background-color: #818cf8; }
+    .heatmap-level-4 { background-color: #6366f1; }
+
+    [data-theme="dark"] .heatmap-level-0 { background-color: #334155; }
+    [data-theme="dark"] .heatmap-level-1 { background-color: #3730a3; }
+    [data-theme="dark"] .heatmap-level-2 { background-color: #4338ca; }
+    [data-theme="dark"] .heatmap-level-3 { background-color: #4f46e5; }
+    [data-theme="dark"] .heatmap-level-4 { background-color: #6366f1; }
+
+    .badge-icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+    }
+    .badge-item.earned .badge-icon {
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        color: white;
+        box-shadow: 0 4px 10px rgba(245, 158, 11, 0.35);
+    }
+    .badge-item.locked .badge-icon {
+        background-color: #e2e8f0;
+        color: #94a3b8;
+    }
+    .badge-item.locked p {
+        color: #94a3b8;
+    }
+    [data-theme="dark"] .badge-item.locked .badge-icon {
+        background-color: #1e293b;
+        color: #475569;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    const riwayatData = {{ riwayat_nilai | tojson }};
+
+    if (riwayatData.length > 0) {
+        const isDark = document.getElementById('html-root').getAttribute('data-theme') === 'dark';
+        const warnaTeks = isDark ? '#cbd5e1' : '#334155';
+        const warnaGrid = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+
+        const ctx = document.getElementById('chartNilai').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: riwayatData.map(r => new Date(r.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' })),
+                datasets: [{
+                    label: 'Nilai Kuis',
+                    data: riwayatData.map(r => r.nilai),
+                    borderColor: '#6366f1',
+                    backgroundColor: 'rgba(99, 102, 241, 0.15)',
+                    tension: 0.3,
+                    fill: true,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#6366f1'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            afterLabel: function(context) {
+                                return riwayatData[context.dataIndex].judul;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: { color: warnaTeks },
+                        grid: { color: warnaGrid }
+                    },
+                    x: {
+                        ticks: { color: warnaTeks },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    }
+</script>
+
+<!-- Search & Filter Materi -->
+<script>
+    const inputCari = document.getElementById('cariMateri');
+    const selectJenjang = document.getElementById('filterJenjang');
+    const barisMateri = document.querySelectorAll('.baris-materi');
+    const pesanTidakketemu = document.getElementById('pesanTidakketemu');
+
+    function terapkanFilter() {
+        const kataKunci = inputCari.value.toLowerCase().trim();
+        const jenjangDipilih = selectJenjang.value;
+        let adaYangCocok = false;
+
+        barisMateri.forEach(baris => {
+            const cocokJudul = baris.dataset.judul.includes(kataKunci);
+            const cocokJenjang = !jenjangDipilih || baris.dataset.jenjang === jenjangDipilih;
+            const tampilkan = cocokJudul && cocokJenjang;
+            baris.classList.toggle('d-none', !tampilkan);
+            if (tampilkan) adaYangCocok = true;
+        });
+
+        pesanTidakketemu.classList.toggle('d-none', adaYangCocok);
+    }
+
+    if (inputCari && selectJenjang) {
+        inputCari.addEventListener('input', terapkanFilter);
+        selectJenjang.addEventListener('change', terapkanFilter);
+    }
+</script>
+{% endblock %}

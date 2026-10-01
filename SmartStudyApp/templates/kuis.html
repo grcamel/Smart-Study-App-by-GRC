@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}Kuis: {{ materi.judul }} - SmartStudyApp{% endblock %}
+
+{% block content %}
+<!-- Data tersembunyi untuk JavaScript (Mencegah error merah di VS Code) -->
+<div id="quizData" data-total="{{ soal_list|length }}" style="display: none;"></div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        
+        <!-- HEADER KUIS -->
+        <div class="text-center mb-4">
+            <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 mb-2">Kuis Interaktif</span>
+            <h2 class="fw-bold" style="color: var(--navy-dark);">{{ materi.judul }}</h2>
+            <p class="text-muted">Jawab <span id="totalSoalDisplay">{{ soal_list|length }}</span> soal berikut dengan teliti.</p>
+        </div>
+
+        <!-- PROGRESS BAR -->
+        <div class="card card-elegant p-3 mb-4">
+            <div class="d-flex justify-content-between mb-2">
+                <small class="fw-semibold text-muted">Progres Pengerjaan</small>
+                <small class="fw-semibold text-primary" id="progressText">0 dari <span id="totalSoalText">{{ soal_list|length }}</span> selesai</small>
+            </div>
+            <div class="progress" style="height: 8px;">
+                <div class="progress-bar bg-primary" id="progressBar" role="progressbar" style="width: 0%;"></div>
+            </div>
+        </div>
+
+        <!-- FORM KUIS -->
+        <form action="/kuis/{{ materi.id }}" method="POST" id="quizForm">
+            
+            {% for soal in soal_list %}
+            <div class="card card-elegant p-4 mb-4 soal-card" id="soal-{{ loop.index }}">
+                <div class="d-flex align-items-start mb-3">
+                    <span class="badge bg-dark rounded-circle me-3" style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">{{ loop.index }}</span>
+                    <h5 class="fw-bold mb-0" style="color: var(--navy-dark);">{{ soal.soal }}</h5>
+                </div>
+
+                <div class="ms-5 ps-2">
+                    {% set opsi_list = soal.pilihan %} 
+                    
+                    {% for opsi in opsi_list %}
+                    <div class="form-check mb-2 p-0">
+                        <input class="form-check-input d-none" type="radio" name="{{ soal.id }}" id="q{{ soal.id }}_{{ loop.index0 }}" value="{{ opsi[0] }}" required onchange="updateProgress()">
+                        <label class="form-check-label w-100 p-3 rounded border quiz-option" for="q{{ soal.id }}_{{ loop.index0 }}" style="cursor: pointer; transition: all 0.2s;">
+                            {{ opsi }}
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- TOMBOL SUBMIT -->
+            <div class="d-grid mb-5">
+                <button type="submit" class="btn btn-accent btn-lg py-3" id="btnSubmit" disabled>
+                    <i class="fas fa-paper-plane me-2"></i> Kirim Jawaban
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Ambil data total soal dari HTML attribute (Aman dari error VS Code)
+    const quizData = document.getElementById('quizData');
+    const totalSoal = parseInt(quizData.dataset.total);
+
+    // Script untuk membuat opsi jawaban interaktif (berubah warna saat dipilih)
+    document.querySelectorAll('.quiz-option').forEach(label => {
+        label.addEventListener('click', function() {
+            const parent = this.closest('.ms-5');
+            parent.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.remove('bg-primary', 'text-white', 'border-primary');
+                opt.style.backgroundColor = '';
+                opt.style.color = '';
+            });
+            this.classList.add('bg-primary', 'text-white', 'border-primary');
+        });
+    });
+
+    // Script untuk Update Progress Bar
+    function updateProgress() {
+        let checkedCount = document.querySelectorAll('input[type="radio"]:checked').length;
+        
+        const percent = (checkedCount / totalSoal) * 100;
+        document.getElementById('progressBar').style.width = percent + '%';
+        document.getElementById('progressText').innerHTML = checkedCount + ' dari <span id="totalSoalText">' + totalSoal + '</span> selesai';
+
+        // Aktifkan tombol submit jika semua sudah dijawab
+        const btnSubmit = document.getElementById('btnSubmit');
+        if (checkedCount === totalSoal) {
+            btnSubmit.disabled = false;
+        } else {
+            btnSubmit.disabled = true;
+        }
+    }
+</script>
+{% endblock %}

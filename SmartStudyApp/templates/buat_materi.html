@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}Buat Materi Baru - SmartStudyApp{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        
+        <!-- HEADER HALAMAN -->
+        <div class="text-center mb-5">
+            <h2 class="fw-bold" style="color: var(--navy-dark);">Buat Paket Belajar</h2>
+            <p class="text-muted">Masukkan materi pelajaranmu, biarkan SmartStudyApp yang merapikannya.</p>
+        </div>
+
+        <!-- FORM INPUT -->
+        <div class="card card-elegant p-4 p-md-5">
+            <form action="/buat_materi" method="POST" enctype="multipart/form-data" id="formMateri">
+                
+                <!-- 1. Judul Materi -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold" style="color: var(--navy-dark);">Judul Materi</label>
+                    <input type="text" class="form-control form-control-lg" name="judul" placeholder="Contoh: Fotosintesis, Hukum Newton, Bab 1 Sejarah" required>
+                </div>
+
+                <!-- 2. Pengaturan Jenjang & Gaya Bahasa -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold" style="color: var(--navy-dark);">Jenjang Pendidikan</label>
+                        <select class="form-select form-select-lg" name="jenjang" required>
+                            <option value="SD">Sekolah Dasar (SD)</option>
+                            <option value="SMP" selected>Sekolah Menengah Pertama (SMP)</option>
+                            <option value="SMA">Sekolah Menengah Atas (SMA)</option>
+                            <option value="Kuliah">Perguruan Tinggi</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold" style="color: var(--navy-dark);">Gaya Bahasa</label>
+                        <select class="form-select form-select-lg" name="gaya_bahasa" required>
+                            <option value="Sederhana">Sangat Sederhana (Mudah dipahami)</option>
+                            <option value="Pelajar" selected>Bahasa Pelajar (Standar)</option>
+                            <option value="Akademik">Bahasa Akademik (Formal)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- 3. Input Materi (Teks atau File) -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold mb-3" style="color: var(--navy-dark);">Sumber Materi</label>
+                    
+                    <!-- Tab Navigasi -->
+                    <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="pills-teks-tab" data-bs-toggle="pill" data-bs-target="#pills-teks" type="button" role="tab">
+                                <i class="fas fa-keyboard me-2"></i>Tempel Teks
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="pills-file-tab" data-bs-toggle="pill" data-bs-target="#pills-file" type="button" role="tab">
+                                <i class="fas fa-file-upload me-2"></i>Unggah Dokumen
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Konten Tab -->
+                    <div class="tab-content" id="pills-tabContent">
+                        <!-- Tab Teks -->
+                        <div class="tab-pane fade show active" id="pills-teks" role="tabpanel">
+                            <textarea class="form-control" name="teks_langsung" rows="8" placeholder="Copy dan paste materi pelajaranmu di sini..."></textarea>
+                            <input type="hidden" name="tipe_input" value="teks">
+                        </div>
+                        
+                        <!-- Tab File -->
+                        <div class="tab-pane fade" id="pills-file" role="tabpanel">
+                            <div class="border rounded-3 p-5 text-center bg-light" style="border-style: dashed !important; border-width: 2px;">
+                                <i class="fas fa-cloud-upload-alt fa-3x mb-3" style="color: var(--accent-purple);"></i>
+                                <h6 class="fw-bold mb-2">Pilih file PDF, Word (.docx), PowerPoint (.pptx), atau TXT</h6>
+                                <p class="text-muted small mb-3">Maksimal ukuran file 16MB</p>
+                                <input type="file" class="form-control w-50 mx-auto" name="file_materi" accept=".pdf,.docx,.pptx,.txt">
+                                <input type="hidden" name="tipe_input" value="file">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Tombol Submit -->
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-accent btn-lg py-3" id="btnGenerate">
+                        <i class="fas fa-magic me-2"></i> Buat Paket Belajar Lengkap
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<!-- MODAL LOADING (Animasi Proses) -->
+<div class="modal fade" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center p-4">
+            <div class="modal-body">
+                <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h5 class="fw-bold mb-2" style="color: var(--navy-dark);" id="loadingText">Membaca materi...</h5>
+                <p class="text-muted small" id="loadingSubtext">Mohon jangan tutup halaman ini.</p>
+                
+                <!-- Progress Bar Animasi -->
+                <div class="progress mt-3" style="height: 6px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 100%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Script untuk menangani animasi loading saat form disubmit
+    const form = document.getElementById('formMateri');
+    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    const loadingText = document.getElementById('loadingText');
+
+    const messages = [
+        "Membaca materi...",
+        "Menemukan konsep penting...",
+        "Menyusun ringkasan...",
+        "Membuat flashcard & kuis...",
+        "Hampir selesai..."
+    ];
+
+    form.addEventListener('submit', function(e) {
+        // Tampilkan modal loading
+        loadingModal.show();
+        
+        // Ubah teks loading setiap 2 detik
+        let step = 0;
+        const interval = setInterval(() => {
+            if (step < messages.length) {
+                loadingText.innerText = messages[step];
+                step++;
+            }
+        }, 2500);
+
+        // Hentikan interval ketika halaman mulai reload (berhasil submit)
+        window.addEventListener('beforeunload', () => {
+            clearInterval(interval);
+        });
+    });
+</script>
+{% endblock %}

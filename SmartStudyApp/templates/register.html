@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Daftar - SmartStudyApp{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card card-elegant p-4 p-md-5 mt-4">
+            <div class="text-center mb-4">
+                <i class="fas fa-user-plus fa-3x mb-3" style="color: var(--accent-purple);"></i>
+                <h2 class="fw-bold" style="color: var(--navy-dark);">Buat Akun Baru</h2>
+                <p class="text-muted">Gratis, dan materi belajarmu tersimpan aman untukmu sendiri.</p>
+            </div>
+
+            <form method="POST" action="/register">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" style="color: var(--navy-dark);">Nama Lengkap</label>
+                    <input type="text" class="form-control form-control-lg" name="nama" placeholder="Nama kamu" required autofocus>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" style="color: var(--navy-dark);">Email</label>
+                    <input type="email" class="form-control form-control-lg" name="email" placeholder="nama@email.com" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" style="color: var(--navy-dark);">Password</label>
+                    <input type="password" class="form-control form-control-lg" name="password" placeholder="Minimal 6 karakter" required minlength="6">
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-semibold" style="color: var(--navy-dark);">Konfirmasi Password</label>
+                    <input type="password" class="form-control form-control-lg" name="konfirmasi_password" placeholder="Ulangi password" required minlength="6">
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-accent btn-lg py-3">
+                        <i class="fas fa-user-plus me-2"></i>Daftar
+                    </button>
+                </div>
+            </form>
+
+            <p class="text-center text-muted mt-4 mb-0">
+                Sudah punya akun? <a href="/login" class="fw-semibold text-decoration-none">Login di sini</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

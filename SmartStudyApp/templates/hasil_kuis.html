@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Hasil Kuis - SmartStudyApp{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        
+        <!-- KARTU HASIL NILAI -->
+        <div class="card card-elegant p-5 text-center mb-4 border-top border-5 border-primary">
+            <h4 class="text-muted mb-3">Kuis Selesai!</h4>
+            <h2 class="fw-bold mb-4" style="color: var(--navy-dark);">{{ materi.judul }}</h2>
+            
+            <div class="d-flex justify-content-center align-items-center mb-4">
+                <div class="position-relative" style="width: 150px; height: 150px;">
+                    <svg class="progress-ring" width="150" height="150">
+                        <circle class="progress-ring__circle" stroke="#e2e8f0" stroke-width="12" fill="transparent" r="60" cx="75" cy="75"/>
+                        <circle class="progress-ring__circle" stroke="var(--accent-purple)" stroke-width="12" fill="transparent" r="60" cx="75" cy="75" 
+                                stroke-dasharray="377" stroke-dashoffset="{{ 377 - (377 * nilai / 100) }}" transform="rotate(-90 75 75)" style="transition: stroke-dashoffset 1s ease;"/>
+                    </svg>
+                    <div class="position-absolute top-50 start-50 translate-middle">
+                        <h1 class="fw-bold mb-0" style="color: var(--navy-dark);">{{ nilai }}</h1>
+                        <small class="text-muted">dari 100</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3 justify-content-center mb-4">
+                <div class="col-4">
+                    <div class="p-3 bg-success bg-opacity-10 rounded-3">
+                        <h5 class="fw-bold text-success mb-0">{{ benar }}</h5>
+                        <small class="text-muted">Benar</small>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="p-3 bg-danger bg-opacity-10 rounded-3">
+                        <h5 class="fw-bold text-danger mb-0">{{ total - benar }}</h5>
+                        <small class="text-muted">Salah</small>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="p-3 bg-primary bg-opacity-10 rounded-3">
+                        <h5 class="fw-bold text-primary mb-0">{{ total }}</h5>
+                        <small class="text-muted">Total Soal</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-center gap-2">
+                <a href="/materi/{{ materi.id }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i> Kembali ke Materi
+                </a>
+                <a href="/kuis/{{ materi.id }}" class="btn btn-accent">
+                    <i class="fas fa-redo me-2"></i> Ulangi Kuis
+                </a>
+            </div>
+        </div>
+
+        <!-- PEMBAHASAN SOAL -->
+        <h4 class="fw-bold mb-3" style="color: var(--navy-dark);"><i class="fas fa-book-open me-2"></i>Pembahasan & Analisis</h4>
+        
+        {% for soal in soal_list %}
+        {% set user_answer = jawaban.get(soal.id|string, '') %}
+        <div class="card card-elegant p-4 mb-3 {{ 'border-start border-4 border-success' if user_answer == soal.kunci_jawaban else 'border-start border-4 border-danger' }}">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <h6 class="fw-bold mb-0" style="color: var(--navy-dark);">Soal {{ loop.index }}</h6>
+                {% if user_answer == soal.kunci_jawaban %}
+                    <span class="badge bg-success"><i class="fas fa-check me-1"></i>Benar</span>
+                {% else %}
+                    <span class="badge bg-danger"><i class="fas fa-times me-1"></i>Salah</span>
+                {% endif %}
+            </div>
+            
+            <p class="mb-3">{{ soal.soal }}</p>
+            
+            <div class="bg-light p-3 rounded-3 small">
+                <p class="mb-1"><strong>Jawaban Kamu:</strong> 
+                    <span class="{{ 'text-success fw-bold' if user_answer == soal.kunci_jawaban else 'text-danger fw-bold' }}">
+                        {{ user_answer if user_answer else 'Tidak dijawab' }}
+                    </span>
+                </p>
+                <p class="mb-2"><strong>Kunci Jawaban:</strong> <span class="text-success fw-bold">{{ soal.kunci_jawaban }}</span></p>
+                <hr class="my-2">
+                <p class="mb-0 text-muted"><i class="fas fa-lightbulb text-warning me-1"></i> <strong>Pembahasan:</strong> {{ soal.pembahasan }}</p>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+</div>
+{% endblock %}

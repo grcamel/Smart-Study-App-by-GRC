@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="id" id="html-root">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SmartStudyApp{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Poppins (Modern & Bersih) -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- TEMA WARNA ELEGAN --- */
+        :root {
+            --navy-dark: #0f172a;      /* Navy Gelap (Profesional) */
+            --navy-light: #1e293b;     /* Navy Terang (Sidebar/Card) */
+            --accent-purple: #6366f1;  /* Biru Keunguan (Aksen Utama) */
+            --accent-hover: #4f46e5;   /* Aksen saat di-hover */
+            --bg-body: #f8fafc;        /* Abu-abu sangat muda (Latar) */
+            --text-main: #334155;      /* Teks utama */
+            --success: #10b981;        /* Hijau (Sukses) */
+            --danger: #ef4444;         /* Merah (Error) */
+        }
+
+        body {
+            background-color: var(--bg-body);
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-main);
+        }
+
+        /* --- NAVBAR --- */
+        .navbar-custom {
+            background-color: var(--navy-dark);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 15px 0;
+        }
+        .navbar-brand {
+            font-weight: 700;
+            color: white !important;
+            font-size: 1.4rem;
+            letter-spacing: 0.5px;
+        }
+        .navbar-brand i {
+            color: var(--accent-purple);
+            margin-right: 8px;
+        }
+        .nav-link {
+            color: #cbd5e1 !important;
+            font-weight: 500;
+            margin: 0 5px;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: white !important;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        /* --- TOMBOL AKSEN --- */
+        .btn-accent {
+            background-color: var(--accent-purple);
+            color: white;
+            border: none;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .btn-accent:hover {
+            background-color: var(--accent-hover);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        /* --- KARTU & KONTEN --- */
+        .card-elegant {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            background-color: white;
+            transition: transform 0.3s ease;
+        }
+        .card-elegant:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* --- FLASH MESSAGES --- */
+        .alert {
+            border-radius: 10px;
+            border: none;
+            font-weight: 500;
+        }
+
+        /* --- FOOTER --- */
+        .footer {
+            background-color: var(--navy-dark);
+            color: #94a3b8;
+            padding: 20px 0;
+            margin-top: 50px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        /* --- DARK MODE --- */
+        [data-theme="dark"] {
+            --bg-body: #0b1120;
+            --text-main: #cbd5e1;
+        }
+        [data-theme="dark"] body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+        }
+        [data-theme="dark"] .card-elegant {
+            background-color: var(--navy-light);
+            color: var(--text-main);
+        }
+        [data-theme="dark"] .text-muted {
+            color: #94a3b8 !important;
+        }
+        [data-theme="dark"] .form-control,
+        [data-theme="dark"] .form-select {
+            background-color: var(--navy-light) !important;
+            color: var(--text-main) !important;
+            border-color: #334155 !important;
+        }
+        [data-theme="dark"] .form-control:focus,
+        [data-theme="dark"] .form-select:focus {
+            background-color: var(--navy-light) !important;
+            color: var(--text-main) !important;
+        }
+        [data-theme="dark"] .input-group-text {
+            background-color: var(--navy-light) !important;
+            color: var(--text-main) !important;
+            border-color: #334155 !important;
+        }
+        [data-theme="dark"] ::placeholder {
+            color: #64748b !important;
+            opacity: 1 !important;
+        }
+        [data-theme="dark"] .table {
+            color: var(--text-main) !important;
+        }
+        [data-theme="dark"] .table > :not(caption) > * > * {
+            background-color: transparent !important;
+            color: var(--text-main) !important;
+            border-color: #334155 !important;
+        }
+        [data-theme="dark"] .bg-light {
+            background-color: var(--navy-light) !important;
+        }
+        /* Badge kecil (misal label jenjang "SMP") pakai bg-light + text-dark;
+           kalau ikut jadi gelap, teksnya jadi tak terlihat. Kembalikan ke terang. */
+        [data-theme="dark"] .badge.bg-light {
+            background-color: #e2e8f0 !important;
+            color: #1e293b !important;
+        }
+        [data-theme="dark"] .nav-pills .nav-link:not(.active) {
+            color: var(--text-main) !important;
+        }
+        [data-theme="dark"] .modal-content {
+            background-color: var(--navy-light);
+            color: var(--text-main);
+        }
+        /* Banyak judul di halaman pakai warna teks navy-dark secara manual (inline style),
+           yang jadi gelap-di-atas-gelap saat dark mode aktif. Paksa jadi terang. */
+        [data-theme="dark"] h1,
+        [data-theme="dark"] h2,
+        [data-theme="dark"] h3,
+        [data-theme="dark"] h4,
+        [data-theme="dark"] h5,
+        [data-theme="dark"] h6,
+        [data-theme="dark"] label {
+            color: #e2e8f0 !important;
+        }
+        /* Banyak elemen (bukan cuma heading) pakai style="color: var(--navy-dark);" manual di
+           berbagai halaman. Satu aturan ini menangkap SEMUA elemen semacam itu sekaligus,
+           di manapun kemunculannya, tanpa perlu di-patch satu per satu. */
+        [data-theme="dark"] [style*="--navy-dark"] {
+            color: #e2e8f0 !important;
+        }
+        [data-theme="dark"] p {
+            color: var(--text-main);
+        }
+        [data-theme="dark"] .footer p {
+            color: #94a3b8 !important;
+        }
+        [data-theme="dark"] .content-area {
+            color: var(--text-main);
+        }
+        [data-theme="dark"] .nav-pills.bg-white {
+            background-color: var(--navy-light) !important;
+        }
+        [data-theme="dark"] .nav-pills .nav-link {
+            color: var(--text-main) !important;
+        }
+        [data-theme="dark"] .nav-pills .nav-link.active {
+            color: white !important;
+        }
+        /* Kartu flashcard sengaja selalu terang (gradient abu-abu muda) meski dark mode aktif,
+           jadi teks di dalamnya harus tetap gelap, bukan ikut aturan h1-h6 di atas. */
+        [data-theme="dark"] .flashcard-item h6 {
+            color: #1e293b !important;
+        }
+        #themeToggle {
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #cbd5e1;
+            font-size: 1.2rem;
+            padding: 0 10px;
+            transition: color 0.2s ease;
+        }
+        #themeToggle:hover {
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR ATAS -->
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-graduation-cap"></i> SmartStudyApp
+            </a>
+            <button class="navbar-toggler bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <button id="themeToggle" title="Ganti tema terang/gelap">
+                <i class="fas fa-moon"></i>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    {% if session.user_id %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">
+                            <i class="fas fa-home me-1"></i> Beranda
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/buat_materi' %}active{% endif %}" href="/buat_materi">
+                            <i class="fas fa-plus-circle me-1"></i> Buat Materi
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/dashboard' %}active{% endif %}" href="/dashboard">
+                            <i class="fas fa-chart-line me-1"></i> Progres
+                        </a>
+                    </li>
+                    <li class="nav-item ms-lg-3">
+                        <a class="btn btn-accent btn-sm" href="/buat_materi">
+                            <i class="fas fa-rocket me-1"></i> Mulai Belajar
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown ms-lg-3">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i> {{ session.user_nama }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item text-danger" href="/logout"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/login' %}active{% endif %}" href="/login">
+                            <i class="fas fa-sign-in-alt me-1"></i> Login
+                        </a>
+                    </li>
+                    <li class="nav-item ms-lg-2">
+                        <a class="btn btn-accent btn-sm" href="/register">
+                            <i class="fas fa-user-plus me-1"></i> Daftar
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- AREA FLASH MESSAGES (Notifikasi) -->
+    <div class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'success' if category == 'success' else 'danger' if category == 'danger' else 'info' }} alert-dismissible fade show shadow-sm" role="alert">
+                        <i class="fas {{ 'fa-check-circle' if category == 'success' else 'fa-exclamation-triangle' if category == 'danger' else 'fa-info-circle' }} me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- KONTEN UTAMA (Halaman anak akan dimuat di sini) -->
+    <div class="container my-4">
+        {% block content %}
+        <!-- Konten dari halaman lain akan muncul di sini -->
+        {% endblock %}
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <p class="mb-0">&copy; 2026 SmartStudyApp. Aplikasi belajar anak Indonesia</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Dark Mode Toggle -->
+    <script>
+        (function() {
+            const root = document.getElementById('html-root');
+            const toggleBtn = document.getElementById('themeToggle');
+            const icon = toggleBtn.querySelector('i');
+
+            function terapkanTema(tema) {
+                if (tema === 'dark') {
+                    root.setAttribute('data-theme', 'dark');
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                } else {
+                    root.removeAttribute('data-theme');
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                }
+            }
+
+            // Muat preferensi tersimpan (default: terang)
+            const temaTersimpan = localStorage.getItem('smartstudy-theme') || 'light';
+            terapkanTema(temaTersimpan);
+
+            toggleBtn.addEventListener('click', function() {
+                const temaSekarang = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+                const temaBaru = temaSekarang === 'dark' ? 'light' : 'dark';
+                terapkanTema(temaBaru);
+                localStorage.setItem('smartstudy-theme', temaBaru);
+            });
+        })();
+    </script>
+
+    <!-- Script Tambahan (Bisa ditambah nanti) -->
+    {% block scripts %}{% endblock %}
+</body>
+</html>

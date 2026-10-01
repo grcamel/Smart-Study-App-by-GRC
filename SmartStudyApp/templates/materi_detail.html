@@ -1,0 +1,297 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ materi.judul }} - SmartStudyApp{% endblock %}
+
+{% block content %}
+<!-- HEADER MATERI -->
+<div class="card card-elegant p-4 mb-4 border-start border-5 border-primary">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+        <div>
+            <span class="badge bg-primary bg-opacity-10 text-primary mb-2 px-3 py-2">{{ materi.jenjang }}</span>
+            <h2 class="fw-bold mb-1" style="color: var(--navy-dark);">{{ materi.judul }}</h2>
+            <p class="text-muted mb-0"><i class="far fa-calendar-alt me-2"></i>Dibuat pada {{ materi.tanggal }}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="/export_pdf/{{ materi.id }}" class="btn btn-outline-secondary">
+                <i class="fas fa-file-pdf me-2"></i>Export PDF
+            </a>
+            <a href="/belajar/{{ materi.id }}" class="btn btn-outline-primary">
+                <i class="fas fa-bullseye me-2"></i>Mode Fokus
+            </a>
+            <a href="/kuis/{{ materi.id }}" class="btn btn-accent">
+                <i class="fas fa-play me-2"></i>Kerjakan Kuis
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- NAVIGASI TAB PAKET BELAJAR -->
+<ul class="nav nav-pills mb-4 bg-white p-2 rounded shadow-sm" id="paketTab" role="tablist">
+    <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tab-ringkasan"><i class="fas fa-align-left me-2"></i>Ringkasan</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-poin"><i class="fas fa-list-ul me-2"></i>Poin Penting</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-flashcard"><i class="fas fa-clone me-2"></i>Flashcard</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-kuis"><i class="fas fa-question-circle me-2"></i>Kuis</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-rencana"><i class="fas fa-clock me-2"></i>Rencana Belajar</button></li>
+</ul>
+
+<!-- KONTEN TAB -->
+<div class="tab-content" id="paketTabContent">
+
+    <!-- 1. TAB RINGKASAN & CORNELL -->
+    <div class="tab-pane fade show active" id="tab-ringkasan">
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card card-elegant p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                        <h4 class="fw-bold mb-0" style="color: var(--navy-dark);"><i class="fas fa-book-open me-2 text-primary"></i>Ringkasan Materi</h4>
+                        <button class="btn btn-outline-primary btn-sm" id="btnDengarkan">
+                            <i class="fas fa-volume-up me-1"></i> Dengarkan Ringkasan
+                        </button>
+                    </div>
+                    <div class="content-area" id="teks-ringkasan" style="line-height: 1.8;">
+                        {{ hasil.ringkasan | safe }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card card-elegant p-4 h-100 bg-light">
+                    <h5 class="fw-bold mb-3" style="color: var(--navy-dark);"><i class="fas fa-sticky-note me-2 text-warning"></i>Kata Kunci</h5>
+                    <div class="d-flex flex-wrap gap-2">
+                        <!-- Simulasi kata kunci (bisa di-parse dari JSON jika ada) -->
+                        <span class="badge bg-white text-dark border px-3 py-2 shadow-sm">Konsep Utama</span>
+                        <span class="badge bg-white text-dark border px-3 py-2 shadow-sm">Definisi</span>
+                        <span class="badge bg-white text-dark border px-3 py-2 shadow-sm">Contoh</span>
+                    </div>
+                    <hr>
+                    <h5 class="fw-bold mb-3" style="color: var(--navy-dark);"><i class="fas fa-lightbulb me-2 text-success"></i>Kesimpulan</h5>
+                    <p class="small text-muted">{{ hasil.kesimpulan | safe }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. TAB POIN PENTING -->
+    <div class="tab-pane fade" id="tab-poin">
+        <div class="card card-elegant p-4">
+            <h4 class="fw-bold mb-3" style="color: var(--navy-dark);"><i class="fas fa-star me-2 text-warning"></i>Poin-Poin Paling Penting</h4>
+            <div class="content-area" style="line-height: 1.8;">
+                {{ hasil.poin_penting | safe }}
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. TAB FLASHCARD (INTERAKTIF) -->
+    <div class="tab-pane fade" id="tab-flashcard">
+        <div class="card card-elegant p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="fw-bold mb-0" style="color: var(--navy-dark);"><i class="fas fa-clone me-2 text-info"></i>Flashcard Interaktif</h4>
+                <span class="badge bg-info text-dark">Klik kartu untuk melihat jawaban</span>
+            </div>
+
+            <div class="row g-3" id="flashcard-container">
+                <!-- Flashcard di-render lewat JS dari data asli backend (flashcard_json) -->
+                <div class="col-12 text-center py-5 text-muted" id="flashcard-loading">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i> Memuat flashcard...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. TAB KUIS -->
+    <div class="tab-pane fade" id="tab-kuis">
+        <div class="card card-elegant p-4 text-center">
+            <i class="fas fa-clipboard-list fa-4x mb-3 text-primary"></i>
+            <h4 class="fw-bold" style="color: var(--navy-dark);">Siap Menguji Pemahamanmu?</h4>
+            <p class="text-muted mb-4">Kuis ini terdiri dari {{ kuis_count }} soal pilihan ganda yang disesuaikan dengan jenjang {{ materi.jenjang }}.</p>
+            <a href="/kuis/{{ materi.id }}" class="btn btn-accent btn-lg px-5">
+                <i class="fas fa-play me-2"></i> Mulai Kuis Sekarang
+            </a>
+        </div>
+    </div>
+
+    <!-- 5. TAB RENCANA BELAJAR -->
+    <div class="tab-pane fade" id="tab-rencana">
+        <div class="card card-elegant p-4">
+            <h4 class="fw-bold mb-4" style="color: var(--navy-dark);"><i class="fas fa-clock me-2 text-success"></i>Rencana Belajar Efektif</h4>
+            <div class="content-area" style="line-height: 1.8;">
+                {{ hasil.rencana_belajar | safe }}
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- TOMBOL AJAIB: JELASKAN LEBIH MUDAH -->
+<div class="card card-elegant p-4 mt-4 bg-primary bg-opacity-10 border-0">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div>
+            <h5 class="fw-bold mb-1" style="color: var(--navy-dark);"><i class="fas fa-magic me-2" style="color: var(--accent-purple);"></i>Masih Bingung?</h5>
+            <p class="text-muted mb-0 small">Minta AI menjelaskan bagian tersulit dengan analogi sehari-hari.</p>
+        </div>
+        <button class="btn btn-accent" data-bs-toggle="modal" data-bs-target="#modalJelaskan">
+            <i class="fas fa-comment-dots me-2"></i>Jelaskan Lebih Mudah
+        </button>
+    </div>
+</div>
+
+<!-- MODAL JELASKAN LEBIH MUDAH -->
+<div class="modal fade" id="modalJelaskan" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white border-0">
+                <h5 class="modal-title fw-bold"><i class="fas fa-robot me-2"></i>Asisten Belajar AI</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-muted mb-3">Pilih cara penjelasan yang kamu inginkan:</p>
+                <div class="d-flex gap-2 flex-wrap mb-4">
+                    <button class="btn btn-outline-primary btn-sm btn-gaya" data-gaya="sd"><i class="fas fa-child me-1"></i>Bahasa Anak SD</button>
+                    <button class="btn btn-outline-primary btn-sm btn-gaya" data-gaya="analogi"><i class="fas fa-apple-alt me-1"></i>Gunakan Analogi</button>
+                    <button class="btn btn-outline-primary btn-sm btn-gaya" data-gaya="contoh"><i class="fas fa-lightbulb me-1"></i>Berikan Contoh Nyata</button>
+                </div>
+                <div class="bg-light p-4 rounded-3 border" id="hasil-jelaskan">
+                    <p class="text-muted fst-italic text-center mb-0">Klik salah satu tombol di atas untuk meminta AI menjelaskan ulang materi ini dengan cara yang lebih sederhana.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Render Flashcard dari data ASLI yang dikirim backend (flashcard_json).
+    // flashcard_json berisi string JSON, contoh: [{"q": "...", "a": "..."}, ...]
+    document.addEventListener("DOMContentLoaded", function() {
+        const container = document.getElementById('flashcard-container');
+        const loading = document.getElementById('flashcard-loading');
+
+        // Data asli dari backend (di-inject lewat Jinja, |tojson biar aman jadi JS)
+        let flashcards = [];
+        try {
+            flashcards = JSON.parse({{ flashcard_json | tojson }});
+        } catch (e) {
+            console.error("Gagal parse flashcard_json:", e);
+            flashcards = [];
+        }
+
+        loading.style.display = 'none';
+
+        if (!Array.isArray(flashcards) || flashcards.length === 0) {
+            container.innerHTML = `
+                <div class="col-12 text-center py-5 text-muted">
+                    <i class="fas fa-exclamation-circle fa-2x mb-2"></i>
+                    <p class="mb-0">Flashcard belum tersedia untuk materi ini.</p>
+                </div>`;
+            return;
+        }
+
+        flashcards.forEach((card, index) => {
+            const col = document.createElement('div');
+            col.className = 'col-md-6 col-lg-4';
+            col.innerHTML = `
+                <div class="card h-100 border-0 shadow-sm flashcard-item" style="cursor: pointer; transition: all 0.3s;">
+                    <div class="card-body p-4 d-flex flex-column justify-content-center text-center" style="min-height: 180px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 12px; border-left: 4px solid var(--accent-purple);">
+                        <span class="badge bg-primary mb-3 align-self-start">Soal ${index + 1}</span>
+                        <h6 class="fw-bold mb-0 text-dark">${card.q}</h6>
+                        <div class="answer mt-3 d-none" style="border-top: 1px dashed #ccc; padding-top: 10px;">
+                            <p class="small text-success fw-semibold mb-0">${card.a}</p>
+                        </div>
+                        <small class="text-muted mt-auto pt-3"><i class="fas fa-hand-pointer me-1"></i>Klik untuk lihat jawaban</small>
+                    </div>
+                </div>
+            `;
+            container.appendChild(col);
+        });
+
+        // Tambahkan event listener untuk klik flashcard
+        document.querySelectorAll('.flashcard-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const answerDiv = this.querySelector('.answer');
+                answerDiv.classList.toggle('d-none');
+            });
+        });
+
+        // --- Fitur "Jelaskan Lebih Mudah" ---
+        const materiId = {{ materi.id }};
+        const hasilBox = document.getElementById('hasil-jelaskan');
+        const tombolGaya = document.querySelectorAll('.btn-gaya');
+
+        tombolGaya.forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const gaya = this.dataset.gaya;
+
+                // Nonaktifkan semua tombol sementara & tampilkan loading
+                tombolGaya.forEach(b => b.disabled = true);
+                hasilBox.innerHTML = `
+                    <div class="text-center text-muted py-3">
+                        <i class="fas fa-spinner fa-spin me-2"></i>Sedang membuat penjelasan...
+                    </div>`;
+
+                try {
+                    const res = await fetch(`/jelaskan/${materiId}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ gaya: gaya })
+                    });
+                    const data = await res.json();
+
+                    if (data.sukses) {
+                        hasilBox.innerHTML = data.penjelasan;
+                    } else {
+                        hasilBox.innerHTML = `<p class="text-danger mb-0"><i class="fas fa-exclamation-circle me-2"></i>${data.pesan || 'Gagal membuat penjelasan.'}</p>`;
+                    }
+                } catch (err) {
+                    hasilBox.innerHTML = `<p class="text-danger mb-0"><i class="fas fa-exclamation-circle me-2"></i>Terjadi kesalahan koneksi. Coba lagi.</p>`;
+                } finally {
+                    tombolGaya.forEach(b => b.disabled = false);
+                }
+            });
+        });
+
+        // --- Fitur "Dengarkan Ringkasan" (Text-to-Speech) ---
+        const btnDengarkan = document.getElementById('btnDengarkan');
+        const teksRingkasanEl = document.getElementById('teks-ringkasan');
+        let sedangBicara = false;
+
+        if (btnDengarkan && 'speechSynthesis' in window) {
+            btnDengarkan.addEventListener('click', function() {
+                if (sedangBicara) {
+                    // Kalau lagi bicara, klik lagi buat berhenti
+                    window.speechSynthesis.cancel();
+                    sedangBicara = false;
+                    btnDengarkan.innerHTML = '<i class="fas fa-volume-up me-1"></i> Dengarkan Ringkasan';
+                    return;
+                }
+
+                const teks = teksRingkasanEl.innerText || teksRingkasanEl.textContent;
+                if (!teks.trim()) return;
+
+                const ucapan = new SpeechSynthesisUtterance(teks);
+                ucapan.lang = 'id-ID';
+                ucapan.rate = 1;
+
+                ucapan.onstart = function() {
+                    sedangBicara = true;
+                    btnDengarkan.innerHTML = '<i class="fas fa-stop-circle me-1"></i> Berhenti';
+                };
+                ucapan.onend = function() {
+                    sedangBicara = false;
+                    btnDengarkan.innerHTML = '<i class="fas fa-volume-up me-1"></i> Dengarkan Ringkasan';
+                };
+                ucapan.onerror = function() {
+                    sedangBicara = false;
+                    btnDengarkan.innerHTML = '<i class="fas fa-volume-up me-1"></i> Dengarkan Ringkasan';
+                };
+
+                window.speechSynthesis.speak(ucapan);
+            });
+        } else if (btnDengarkan) {
+            // Browser tidak mendukung text-to-speech
+            btnDengarkan.disabled = true;
+            btnDengarkan.title = 'Browser ini tidak mendukung fitur dengarkan ringkasan';
+        }
+    });
+</script>
+{% endblock %}
